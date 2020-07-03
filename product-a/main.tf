@@ -56,7 +56,7 @@ module "eks" {
   subnets      = data.terraform_remote_state.network.outputs.private_subnet_id
 
   tags = {
-    Environment = "test"
+    Environment = "dev"
     GithubRepo  = "terraform-aws-eks"
     GithubOrg   = "terraform-aws-modules"
   }
