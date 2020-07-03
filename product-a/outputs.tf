@@ -20,5 +20,5 @@ output "config_map_aws_auth" {
 
 output "region" {
   description = "AWS region."
-  value       = "us-east-1"
+  value       = var.region
 }

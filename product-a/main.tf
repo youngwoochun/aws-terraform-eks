@@ -4,7 +4,7 @@ terraform {
 
 provider "aws" {
   version = ">= 2.28.1"
-  region  = "us-east-1"
+  region  = var.region
 }
 
 provider "random" {
@@ -52,11 +52,11 @@ data "terraform_remote_state" "network" {
 }
 module "eks" {
   source       = "../eks"
-  cluster_name = "main_eks"
+  cluster_name = var.cluster_name
   subnets      = data.terraform_remote_state.network.outputs.private_subnet_id
 
   tags = {
-    Environment = "dev"
+    Environment = "test"
     GithubRepo  = "terraform-aws-eks"
     GithubOrg   = "terraform-aws-modules"
   }
