@@ -28,7 +28,7 @@ provider "kubernetes" {
 }
 
 module "my-cluster" {
-  source          = "../terraform-aws-eks"
+  source          = "../eks"
   cluster_name    = var.cluster_name
   cluster_version = "1.16"
   subnets         = data.terraform_remote_state.network.outputs.private_subnet_id
