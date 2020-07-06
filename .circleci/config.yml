@@ -88,6 +88,7 @@ jobs:
             export KUBECONFIG=~/.kube/eks-cluster
       - run:
           name: configmap aws-auth
+          command: |
             terraform output config_map > config-map-aws-auth.yaml
             kubectl apply -f config-map-aws-auth.yaml
             kubectl get nodes --watch
