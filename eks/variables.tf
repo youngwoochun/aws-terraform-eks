@@ -338,3 +338,7 @@ variable "cluster_encryption_config" {
   }))
   default = []
 }
+
+variable "bastion_security_group_id" {
+  type = list(string)
+}

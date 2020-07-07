@@ -84,8 +84,8 @@ jobs:
       - run:
           name: kubeconfig
           command: |
-            terraform output kubeconfig > ~/.kube/eks-cluster
-            export KUBECONFIG=~/.kube/eks-cluster
+            terraform output kubeconfig > .kube/eks-cluster
+            export KUBECONFIG=.kube/eks-cluster
       - run:
           name: configmap aws-auth
           command: |
@@ -107,14 +107,14 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - kubectl:
-          requires:
-            - apply
+      #- kubectl:
+      #    requires:
+      #      - apply
       - hold-destroy:
           type: approval
           requires:
             - apply
-            - kubectl
+          #  - kubectl
       - destroy:
           requires:
             - hold-destroy

@@ -28,15 +28,16 @@ provider "kubernetes" {
 }
 
 module "my-cluster" {
-  source          = "../eks"
-  cluster_name    = var.cluster_name
-  cluster_version = "1.16"
-  subnets         = data.terraform_remote_state.network.outputs.private_subnet_id
-  vpc_id          = data.terraform_remote_state.network.outputs.vpc_id
+  source                    = "../eks"
+  cluster_name              = var.cluster_name
+  cluster_version           = "1.16"
+  subnets                   = data.terraform_remote_state.network.outputs.private_subnet_id
+  vpc_id                    = data.terraform_remote_state.network.outputs.vpc_id
+  bastion_security_group_id = data.terraform_remote_state.network.outputs.bastion_sg_id
   worker_groups = [
    {
-     instance_type = "m4.large"
-     asg_max_size  = 5
+     instance_type = "t3.medium"
+     asg_max_size  = 3
    }
  ]
 }
