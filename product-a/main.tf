@@ -33,7 +33,7 @@ module "my-cluster" {
   cluster_version           = "1.16"
   subnets                   = data.terraform_remote_state.network.outputs.private_subnet_id
   vpc_id                    = data.terraform_remote_state.network.outputs.vpc_id
-  bastion_security_group_id = data.terraform_remote_state.network.outputs.bastion_sg_id[0]
+  bastion_security_group_id = data.terraform_remote_state.network.outputs.bastion_sg_id
   worker_groups = [
    {
      instance_type = "t3.medium"
