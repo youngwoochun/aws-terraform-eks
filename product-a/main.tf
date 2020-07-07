@@ -36,8 +36,12 @@ module "my-cluster" {
   bastion_security_group_id = data.terraform_remote_state.network.outputs.bastion_sg_id
   worker_groups = [
    {
-     instance_type = "t3.medium"
-     asg_max_size  = 3
-   }
+     instance_type                 = "t2.small"
+     asg_desired_capacity          = 2
+   },
+   {
+     instance_type                 = "t2.medium"
+     asg_desired_capacity          = 1
+   },
  ]
 }

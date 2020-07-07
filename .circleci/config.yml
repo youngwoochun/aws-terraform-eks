@@ -65,6 +65,12 @@ jobs:
           command: |
             cd product-a
             terraform apply --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
+      - run:
+          name: kubeconfig
+          command: |
+            terraform output kubeconfig > .kube/eks-cluster
+            export KUBECONFIG=.kube/eks-cluster
+            kubectl run nginx --image=nginx
 
   destroy:
     <<: *default_config
