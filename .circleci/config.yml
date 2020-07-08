@@ -81,6 +81,7 @@ jobs:
     <<: *environment
     steps:
       - *restore_repo
+      - *tf-install
       - run:
           command: |
             cd product-a
@@ -98,6 +99,7 @@ jobs:
     <<: *environment
     steps:
       - *restore_repo
+      - *tf-install
       - run:
           name: terraform destroy
           command: |
