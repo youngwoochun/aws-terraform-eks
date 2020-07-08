@@ -3,7 +3,7 @@ version: 2.1
 references:
 
 base_image: &base_image
-  hashicorp/terraform:light
+  cimg/base:2020.01
 
 working_directory: &working_directory
   ~/Project-1
@@ -45,12 +45,20 @@ kubectl: &kubectl
   run:
     name: kubectl
     command: |
-      apt update
-      apt install curl
+      apt update && apt install curl
       curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/kubectl
       chmod +x ./kubectl
       sudo mv ./kubectl /usr/local/bin/kubectl
       kubectl version --client
+
+tf-install: &tf-install
+  run:
+    name: tf-install
+    command: |
+      wget https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip
+      sudo unzip terraform_0.12.24_linux_amd64.zip -d /usr/local/bin/
+      rm terraform_0.12.24_linux_amd64.zip
+      terraform --version
 
 jobs:
   plan:
