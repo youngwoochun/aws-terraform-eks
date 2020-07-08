@@ -1,9 +1,5 @@
 version: 2.1
 
-orbs:
-  aws-eks: circleci/aws-eks@0.2.7
-  kubernetes: circleci/kubernetes@0.11.0
-
 references:
 
 base_image: &base_image
@@ -49,7 +45,8 @@ kubectl: &kubectl
   run:
     name: kubectl
     command: |
-      apt-get update && apt-get install -y curl
+      sudo apt update
+      sudo apt install curl
       curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/kubectl
       chmod +x ./kubectl
       sudo mv ./kubectl /usr/local/bin/kubectl
