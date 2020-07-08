@@ -1,5 +1,9 @@
 version: 2.1
 
+orbs:
+  aws-eks: circleci/aws-eks@0.2.7
+  kubernetes: circleci/kubernetes@0.11.0
+
 references:
 
 base_image: &base_image
@@ -65,13 +69,6 @@ jobs:
           command: |
             cd product-a
             terraform apply --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
-            ls -la
-            mkdir .kube/eks-cluster
-            terraform output kubeconfig > ~/.kube/eks-cluster
-            export KUBECONFIG=~/.kube/eks-cluster
-            kubectl get nodes
-            kubectl create deployment my-dep --image=busybox
-            kubectl get pods -o wide
 
   destroy:
     <<: *default_config
@@ -83,23 +80,6 @@ jobs:
           command: |
             cd product-a
             terraform destroy --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
-  kubectl:
-    <<: *default_config
-    <<: *environment
-    steps:
-      - *restore_repo
-      - run:
-          name: kubeconfig
-          command: |
-            terraform output kubeconfig > .kube/eks-cluster
-            export KUBECONFIG=.kube/eks-cluster
-      - run:
-          name: configmap aws-auth
-          command: |
-            terraform output config_map > config-map-aws-auth.yaml
-            kubectl apply -f config-map-aws-auth.yaml
-            kubectl get nodes --watch
-
 
 
 workflows:
@@ -114,9 +94,28 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      #- kubectl:
-      #    requires:
-      #      - apply
+      - aws-eks/create-cluster:
+          cluster-name: eks-demo-deployment
+      - create-deployment:
+          cluster-name: eks-demo-deployment
+          requires:
+            - aws-eks/create-cluster
+      - aws-eks/update-container-image:
+          cluster-name: eks-demo-deployment
+          container-image-updates: 'nginx=nginx:1.9.1'
+          post-steps:
+            - kubernetes/delete-resource:
+                resource-names: nginx-deployment
+                resource-types: deployment
+                wait: true
+          record: true
+          requires:
+            - create-deployment
+          resource-name: deployment/nginx-deployment
+      - aws-eks/delete-cluster:
+          cluster-name: eks-demo-deployment
+          requires:
+            - aws-eks/update-container-image
       - hold-destroy:
           type: approval
           requires:
