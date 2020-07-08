@@ -80,7 +80,22 @@ jobs:
           command: |
             cd product-a
             terraform destroy --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
-
+  create-deployment:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: tests/nginx-deployment/deployment.yaml
+          resource-name: deployment/nginx-deployment
 
 workflows:
   version: 2
