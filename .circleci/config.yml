@@ -66,6 +66,7 @@ jobs:
     <<: *environment
     steps:
       - checkout
+      - *tf-install
       - *terraform_init
       - *save_repo
       - *restore_repo
