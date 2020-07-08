@@ -89,8 +89,7 @@ jobs:
       - *kubectl
       - run:
           command: |
-            terraform output kubeconfig > ~/.kube/eks-cluster
-            export KUBECONFIG=~/.kube/eks-cluster
+            aws eks --region us-east-1 update-kubeconfig --name main_eks
             kubectl get nodes
             kubectl create deployment my-dep --image=busybox
             kubectl get pod -o wide
