@@ -1,5 +1,9 @@
 version: 2.1
 
+orbs:
+  aws-eks: circleci/aws-eks@0.2.7
+  kubernetes: circleci/kubernetes@0.11.0
+
 references:
 
 base_image: &base_image
@@ -41,6 +45,15 @@ environment: &environment
       type: env_var_name
       default: REGION
 
+kubectl: &kubectl
+  run:
+    name: kubectl
+    command: |
+      curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/kubectl
+      chmod +x ./kubectl
+      sudo mv ./kubectl /usr/local/bin/kubectl
+      kubectl version --client
+
 jobs:
   plan:
     <<: *default_config
@@ -65,9 +78,10 @@ jobs:
           command: |
             cd product-a
             terraform apply --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
+      - *kubectl
       - run:
           command: |
-            ls -la
+
             mkdir .kube/eks-cluster
             terraform output kubeconfig > ~/.kube/eks-cluster
             export KUBECONFIG=~/.kube/eks-cluster
@@ -86,11 +100,8 @@ jobs:
             cd product-a
             terraform destroy --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
 
-orbs:
-  aws-eks: circleci/aws-eks@0.2.7
-  kubernetes: circleci/kubernetes@0.11.0
-
 workflows:
+  version: 2
   Example_Workflow:
     jobs:
       - plan
@@ -101,14 +112,9 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - aws-eks/create-cluster:
-          cluster-name: main_eks
-          requires:
-            - apply
-      - test-cluster:
-          cluster-name: main_eks
-          requires:
-            - aws-eks/create-cluster
+      #- kubectl:
+      #    requires:
+      #      - apply
       - hold-destroy:
           type: approval
           requires:
