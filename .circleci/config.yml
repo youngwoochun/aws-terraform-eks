@@ -104,7 +104,7 @@ jobs:
             aws eks --region us-east-1 update-kubeconfig --name main_eks
             kubectl get nodes
             kubectl create deployment my-dep --image=busybox
-            kubectl get pod -o wide
+            kubectl get pod -w
   destroy:
     <<: *default_config
     <<: *environment
