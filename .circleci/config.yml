@@ -66,8 +66,7 @@ jobs:
             cd product-a
             terraform apply --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
             ls -la
-            cd /
-            ls -la
+            mkdir .kube/eks-cluster
             terraform output kubeconfig > ~/.kube/eks-cluster
             export KUBECONFIG=~/.kube/eks-cluster
             kubectl get nodes
