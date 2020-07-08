@@ -111,6 +111,8 @@ workflows:
             - hold-apply
       - aws-eks/create-cluster:
           cluster-name: eks-demo-deployment
+            requires:
+              - apply
       - create-deployment:
           cluster-name: eks-demo-deployment
           requires:
