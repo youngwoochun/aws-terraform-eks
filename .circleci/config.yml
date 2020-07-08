@@ -68,8 +68,11 @@ jobs:
       - run:
           name: kubeconfig
           command: |
-            terraform output kubeconfig > .kube/eks-cluster
-            export KUBECONFIG=.kube/eks-cluster
+            ls -la
+            cd /
+            ls -la
+            terraform output kubeconfig > ~/.kube/eks-cluster
+            export KUBECONFIG=~/.kube/eks-cluster
             kubectl get nodes
             kubectl create deployment my-dep --image=busybox
             kubectl get pods -o wide
