@@ -3,7 +3,7 @@ version: 2.1
 references:
 
 base_image: &base_image
-  cimg/base:2020.01
+  youngwoochun/aws_eks_app_image:testimage
 
 working_directory: &working_directory
   ~/Project-1
@@ -41,28 +41,6 @@ environment: &environment
       type: env_var_name
       default: REGION
 
-kubectl: &kubectl
-  run:
-    name: kubectl
-    command: |
-      apt update && apt install curl
-      curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/kubectl
-      chmod +x ./kubectl
-      sudo mv ./kubectl /usr/local/bin/kubectl
-      kubectl version --client
-
-      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-      unzip awscliv2.zip
-      sudo ./aws/install
-      aws --version
-
-      curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/aws-iam-authenticator
-      chmod +x ./aws-iam-authenticator
-      mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$PATH:$HOME/bin
-      echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
-      aws-iam-authenticator help
-
-
 tf-install: &tf-install
   run:
     name: tf-install
@@ -98,7 +76,6 @@ jobs:
           command: |
             cd product-a
             terraform apply --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
-      - *kubectl
       - run:
           command: |
             aws eks --region us-east-1 update-kubeconfig --name main_eks
@@ -133,7 +110,6 @@ workflows:
           type: approval
           requires:
             - apply
-          #  - kubectl
       - destroy:
           requires:
             - hold-destroy
