@@ -57,22 +57,20 @@ jobs:
     <<: *environment
     steps:
       - checkout
-      - *tf-install
       - *terraform_init
-      - *save_repo
-      - *restore_repo
       - run:
           name: terraform plan
           command: |
             cd product-a
             terraform plan -input=false -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
+      - *save_repo
+
 
   apply:
     <<: *default_config
     <<: *environment
     steps:
       - *restore_repo
-      - *tf-install
       - run:
           command: |
             cd product-a
@@ -80,15 +78,15 @@ jobs:
       - run:
           command: |
             aws eks --region us-east-1 update-kubeconfig --name main_eks
+            kubectl apply -f aws-auth-cm.yaml                        
             kubectl get nodes
-            kubectl create deployment my-dep --image=busybox
+            kubectl create deployment my-dep --image=nginx
             kubectl get pod -w
   destroy:
     <<: *default_config
     <<: *environment
     steps:
       - *restore_repo
-      - *tf-install
       - run:
           name: terraform destroy
           command: |
