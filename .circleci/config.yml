@@ -127,8 +127,6 @@ workflows:
     jobs:
       - create-deployment:
           cluster-name: main_eks
-          requires:
-            - aws-eks/create-cluster
       - aws-eks/update-container-image:
           cluster-name: main_eks
           resource-name: "deployment/nginx-deployment"
