@@ -51,13 +51,13 @@ jobs:
     steps:
       - checkout
       - *terraform_init
-      - *save_repo
-      - *restore_repo
       - run:
           name: terraform plan
           command: |
             cd product-a
             terraform plan -input=false -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
+      - *save_repo
+
 
   apply:
     <<: *default_config
