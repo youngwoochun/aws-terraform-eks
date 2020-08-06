@@ -33,7 +33,7 @@ terraform_init: &terraform_init
     name: terraform init
     command: |
       cd product-a
-      terraform init
+      terraform init --reconfigure
 
 environment: &environment
   parameters:
@@ -81,6 +81,7 @@ jobs:
             terraform destroy --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
 
   create-deployment:
+    <<: *environment
     executor: aws-eks/python3
     parameters:
       cluster-name:
@@ -109,12 +110,10 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - hold-destroy:
-          type: approval
-          requires:
-            - apply
       - create-deployment:
           cluster-name: main_eks
+          requires:
+            - apply
       - aws-eks/update-container-image:
           cluster-name: main_eks
           container-image-updates: 'nginx=nginx:1.9.1'
@@ -131,6 +130,10 @@ workflows:
           cluster-name: main_eks
           requires:
             - aws-eks/update-container-image
+      - hold-destroy:
+          type: approval
+          requires:
+            - aws-eks/delete-cluster
       - destroy:
           requires:
             - hold-destroy
