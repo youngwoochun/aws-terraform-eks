@@ -33,7 +33,7 @@ terraform_init: &terraform_init
     name: terraform init
     command: |
       cd product-a
-      terraform init --reconfigure
+      terraform init
 
 environment: &environment
   parameters:
