@@ -114,16 +114,6 @@ workflows:
           type: approval
           requires:
             - apply
-      - destroy:
-          requires:
-            - hold-destroy
-          filters:
-            branches:
-              ignore:
-                - develop
-                - /feature-.*/
-  deployment:
-    jobs:
       - aws-eks/create-cluster:
           cluster-name: eks-demo-deployment
       - create-deployment:
@@ -146,3 +136,11 @@ workflows:
           cluster-name: eks-demo-deployment
           requires:
             - aws-eks/update-container-image
+      - destroy:
+          requires:
+            - hold-destroy
+          filters:
+            branches:
+              ignore:
+                - develop
+                - /feature-.*/
