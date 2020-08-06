@@ -93,10 +93,9 @@ jobs:
           cluster-name: << parameters.cluster-name >>
           install-kubectl: true
       - kubernetes/create-or-update-resource:
-          resource-file-path: "tests/nginx-deployment/deployment.yaml"
-          resource-name: "deployment/nginx-deployment"
           get-rollout-status: true
-          show-kubectl-command: true
+          resource-file-path: tests/nginx-deployment/deployment.yaml
+          resource-name: deployment/nginx-deployment
 
 workflows:
   version: 2
@@ -125,16 +124,25 @@ workflows:
                 - /feature-.*/
   deployment:
     jobs:
+      - aws-eks/create-cluster:
+          cluster-name: eks-demo-deployment
       - create-deployment:
-          cluster-name: main_eks
+          cluster-name: eks-demo-deployment
+          requires:
+            - aws-eks/create-cluster
       - aws-eks/update-container-image:
-          cluster-name: main_eks
-          resource-name: "deployment/nginx-deployment"
-          container-image-updates: "nginx=nginx:1.9.1"
+          cluster-name: eks-demo-deployment
+          container-image-updates: 'nginx=nginx:1.9.1'
+          post-steps:
+            - kubernetes/delete-resource:
+                resource-names: nginx-deployment
+                resource-types: deployment
+                wait: true
           record: true
           requires:
             - create-deployment
+          resource-name: deployment/nginx-deployment
       - aws-eks/delete-cluster:
-          cluster-name: main_eks
+          cluster-name: eks-demo-deployment
           requires:
-              - aws-eks/update-container-image
+            - aws-eks/update-container-image
