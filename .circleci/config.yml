@@ -109,19 +109,24 @@ workflows:
       - apply:
           requires:
             - hold-apply
-            -
       - hold-destroy:
           type: approval
           requires:
             - apply
-      - aws-eks/create-cluster:
-          cluster-name: eks-demo-deployment
-      - create-deployment:
-          cluster-name: eks-demo-deployment
+      - destroy:
           requires:
-            - aws-eks/create-cluster
+            - hold-destroy
+          filters:
+            branches:
+              ignore:
+                - develop
+                - /feature-.*/
+  deployment:
+    jobs:
+      - create-deployment:
+          cluster-name: main_eks
       - aws-eks/update-container-image:
-          cluster-name: eks-demo-deployment
+          cluster-name: main_eks
           container-image-updates: 'nginx=nginx:1.9.1'
           post-steps:
             - kubernetes/delete-resource:
@@ -133,14 +138,6 @@ workflows:
             - create-deployment
           resource-name: deployment/nginx-deployment
       - aws-eks/delete-cluster:
-          cluster-name: eks-demo-deployment
+          cluster-name: main_eks
           requires:
             - aws-eks/update-container-image
-      - destroy:
-          requires:
-            - hold-destroy
-          filters:
-            branches:
-              ignore:
-                - develop
-                - /feature-.*/
