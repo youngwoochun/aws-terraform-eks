@@ -45,7 +45,7 @@ locals {
     asg_recreate_on_change        = false                       # Recreate the autoscaling group when the Launch Template or Launch Configuration change.
     default_cooldown              = null                        # The amount of time, in seconds, after a scaling activity completes before another scaling activity can start.
     health_check_grace_period     = null                        # Time in seconds after instance comes into service before checking health.
-    instance_type                 = "m4.large"                  # Size of the workers instances.
+    instance_type                 = "t2.micro"                  # Size of the workers instances.
     spot_price                    = ""                          # Cost of spot instance.
     placement_tenancy             = ""                          # The tenancy of the instance. Valid values are "default" or "dedicated".
     root_volume_size              = "100"                       # root volume size of workers instances.
@@ -57,8 +57,8 @@ locals {
     userdata_template_extra_args  = {}                          # Additional arguments to use when expanding the userdata template file
     bootstrap_extra_args          = ""                          # Extra arguments passed to the bootstrap.sh script from the EKS AMI (Amazon Machine Image).
     additional_userdata           = ""                          # userdata to append to the default userdata.
-    ebs_optimized                 = true                        # sets whether to use ebs optimization on supported types.
-    enable_monitoring             = true                        # Enables/disables detailed monitoring.
+    ebs_optimized                 = false                       # sets whether to use ebs optimization on supported types.
+    enable_monitoring             = false                       # Enables/disables detailed monitoring.
     public_ip                     = false                       # Associate a public ip address with a worker
     kubelet_extra_args            = ""                          # This string is passed directly to kubelet if set. Useful for adding labels or taints.
     subnets                       = var.subnets                 # A list of subnets to place the worker nodes in. i.e. ["subnet-123", "subnet-456", "subnet-789"]
