@@ -79,7 +79,7 @@ jobs:
             cd product-a
             terraform destroy --auto-approve -var-file=./config/${<< parameters.region >>}.tfvars -var-file=./config/common.tfvars -var-file=./config/${<< parameters.config >>}.tfvars
 
-  create-deployment:
+  k8s-deployment:
     <<: *environment
     executor: aws-eks/python3
     parameters:
@@ -87,15 +87,47 @@ jobs:
         description: |
           Name of the EKS cluster
         type: string
+      aws-region:
+        description: |
+          Name of AWS region
+        type: string
     steps:
       - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           install-kubectl: true
+          aws-region: << parameters.aws-region >>
       - kubernetes/create-or-update-resource:
+          resource-file-path: "deployment/product-a-deployment.yaml"
           get-rollout-status: true
-          resource-file-path: tests/nginx-deployment/deployment.yaml
-          resource-name: deployment/nginx-deployment
+          resource-name: deployment/demoapp
+      - kubernetes/create-or-update-resource:
+          resource-file-path: "deployment/product-a-service.yaml"
+  undeploy-application:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+      aws-region:
+        description: |
+          AWS region
+        type: string
+        default: ""
+    steps:
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          install-kubectl: true
+          aws-region: << parameters.aws-region >>
+      - kubernetes/delete-resource:
+          resource-types: "deployment,service"
+          label-selector: "app=demo"
+          wait: true
+      - run:
+          name: Check on pod status
+          command: |
+            kubectl get pods
 
 workflows:
   version: 2
@@ -109,30 +141,20 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - create-deployment:
+      - k8s-deployment:
           cluster-name: main_eks
+          aws-region: us-east-1
           requires:
             - apply
-      - aws-eks/update-container-image:
+      - undeploy-application:
           cluster-name: main_eks
-          container-image-updates: 'nginx=nginx:1.9.1'
-          post-steps:
-            - kubernetes/delete-resource:
-                resource-names: nginx-deployment
-                resource-types: deployment
-                wait: true
-          record: true
+          aws-region: us-east-1
           requires:
-            - create-deployment
-          resource-name: deployment/nginx-deployment
-      - aws-eks/delete-cluster:
-          cluster-name: main_eks
-          requires:
-            - aws-eks/update-container-image
+            - k8s-deployment
       - hold-destroy:
           type: approval
           requires:
-            - aws-eks/delete-cluster
+            - undeploy-application
       - destroy:
           requires:
             - hold-destroy
