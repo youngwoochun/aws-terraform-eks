@@ -101,10 +101,13 @@ jobs:
           resource-file-path: "deployment/product-a-deployment.yaml"
           get-rollout-status: true
           resource-name: deployment/demoapp
-          kubectl get nodes 
-          kubectl get pods -o wide
-          kubectl get svc --all-namespaces
-          kubectl get deployments --all-namespaces
+      - run:
+          name: checking nodes, pods, svc, deploy
+          command: |
+            kubectl get nodes
+            kubectl get pods -o wide
+            kubectl get svc --all-namespaces
+            kubectl get deployments --all-namespaces
       - kubernetes/create-or-update-resource:
           resource-file-path: "deployment/product-a-service.yaml"
   undeploy-application:
